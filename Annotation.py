@@ -4,9 +4,9 @@ Created on Mon Nov  4 18:35:23 2024
 
 @author: UOU
 """
-
 import cv2
 import numpy as np
+import os
 
 # Parameters for drawing
 drawing = False  # True if the mouse is pressed
@@ -34,13 +34,27 @@ def draw_contour(event, x, y, flags, param):
         # Close the contour by connecting the last point to the first
         annotations[-1].append((x, y))
 
+# Function to save annotations as (x, y, h, w)
+def save_annotations(image_path):
+    annotation_file = os.path.splitext(image_path)[0] + "_annotations.txt"
+    with open(annotation_file, "w") as f:
+        for contour in annotations:
+            points = np.array(contour, dtype=np.int32)
+            x, y, w, h = cv2.boundingRect(points)  # Calculate bounding box
+            f.write(f"{x}, {y}, {w}, {h}\n")  # Save as (x, y, w, h)
+    print(f"Annotations saved to {annotation_file}")
+
 # Function to display the image and collect annotations
 def segment_image(image_path):
+    global annotations
+    # Reset annotations for each image
+    annotations = []
+
     # Read the image
     image = cv2.imread(image_path)
     if image is None:
-        print("Image not found!")
-        return
+        print(f"Image not found: {image_path}")
+        return False
 
     # Create a clone of the image for annotation display
     annotated_image = image.copy()
@@ -52,30 +66,49 @@ def segment_image(image_path):
         temp_image = annotated_image.copy()
         for contour in annotations:
             points = np.array(contour, dtype=np.int32)
-            cv2.polylines(temp_image, [points], isClosed=True, color=(0, 255, 0), thickness=2)
+            x, y, w, h = cv2.boundingRect(points)
+            # Draw the bounding box
+            cv2.rectangle(temp_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
         # Display the image with annotations
         cv2.imshow("Image Segmentation", temp_image)
         
-        # Press 's' to save annotations, 'c' to clear, and 'q' to quit
+        # Press 'n' to go to the next image, 's' to save, 'c' to clear, and 'q' to quit
         key = cv2.waitKey(1) & 0xFF
-        if key == ord("s"):
-            # Save annotations
-            with open("annotations.txt", "w") as f:
-                for contour in annotations:
-                    f.write(str(contour) + "\n")
-            print("Annotations saved to annotations.txt")
+        if key == ord("n"):
+            # Save annotations and proceed to next image
+            save_annotations(image_path)
+            break
+        elif key == ord("s"):
+            # Save annotations without proceeding
+            save_annotations(image_path)
         elif key == ord("c"):
             # Clear annotations
             annotations.clear()
             annotated_image = image.copy()
             print("Annotations cleared")
         elif key == ord("q"):
-            break
+            cv2.destroyAllWindows()
+            return False
 
     cv2.destroyAllWindows()
+    return True
+
+# Function to process multiple images
+def process_images(image_folder):
+    # Get list of image files in the folder
+    image_files = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(('.jpg', '.png', '.jpeg'))]
+    if not image_files:
+        print("No images found in the folder!")
+        return
+
+    for image_file in image_files:
+        print(f"Processing: {image_file}")
+        if not segment_image(image_file):
+            print("Exiting segmentation tool.")
+            break
 
 # Example usage
 if __name__ == "__main__":
-    PathNames = r"D:\02_Lectures\2024_2nd\Lecture_Materials\SW_Dev\Project\val2017\val2017"
-    segment_image(PathNames + "//000000000285.jpg")
+    image_folder = r"C:/Users/cic/Desktop/kimjw/DEC20_t/image file"
+    process_images(image_folder)
