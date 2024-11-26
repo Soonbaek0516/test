@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov  4 18:35:23 2024
-
-@author: UOU
-"""
 import cv2
 import numpy as np
 import os
@@ -110,9 +104,5 @@ def process_images(image_folder):
 
 # Example usage
 if __name__ == "__main__":
-<<<<<<< HEAD
     image_folder = r"C:/Users/cic/Desktop/kimjw_SW/wow/image file"
-=======
-    image_folder = r"C:/Users/cic/Desktop/kimjw/DEC20_t/image file"
->>>>>>> parent of 08b57b8 (Reapply "code rewrite")
     process_images(image_folder)
