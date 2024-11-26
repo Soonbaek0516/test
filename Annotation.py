@@ -104,5 +104,5 @@ def process_images(image_folder):
 
 # Example usage
 if __name__ == "__main__":
-    image_folder = r"C:/Users/cic/Desktop/kimjw/DEC20_t/image file"
+    image_folder = r"C:/Users/cic/Desktop/kimjw_SW/wow/image file"
     process_images(image_folder)
