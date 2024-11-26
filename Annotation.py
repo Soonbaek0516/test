@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov  4 18:35:23 2024
-
-@author: UOU
-"""
 import cv2
 import numpy as np
 import os
@@ -95,12 +89,20 @@ def segment_image(image_path):
     return True
 
 # Function to process multiple images
-def process_images(image_folder):
+def process_images(image_folder, start_file=None):
     # Get list of image files in the folder
-    image_files = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(('.jpg', '.png', '.jpeg'))]
+    image_files = sorted([os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(('.jpg', '.png', '.jpeg'))])
     if not image_files:
         print("No images found in the folder!")
         return
+
+    # If a start file is provided, begin from that file
+    if start_file:
+        if start_file in [os.path.basename(f) for f in image_files]:
+            start_index = [os.path.basename(f) for f in image_files].index(start_file)
+            image_files = image_files[start_index:]
+        else:
+            print(f"Start file '{start_file}' not found in the folder. Starting from the first image.")
 
     for image_file in image_files:
         print(f"Processing: {image_file}")
@@ -111,4 +113,5 @@ def process_images(image_folder):
 # Example usage
 if __name__ == "__main__":
     image_folder = r"C:/Users/cic/Desktop/kimjw/DEC20_t/image file"
-    process_images(image_folder)
+    start_file = input("Enter the name of the file to start from (leave blank to start from the first image): 000000000776.jpg ").strip()
+    process_images(image_folder, start_file if start_file else None)
